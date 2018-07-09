@@ -33,10 +33,8 @@ public class Persona {
         this.direccion = direccion;
     }
 
-    public Persona(int id, String nombre, String direccion) {
+    public Persona() {
 
-        this.id = id;
-        this.nombre = nombre;
-        this.direccion = direccion;
+
     }
 }

@@ -1,7 +1,10 @@
 package com.donali.DAO;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 /***
@@ -42,13 +45,84 @@ public  abstract class BaseDao<GenericType> implements DaoDefinition<GenericType
 
     abstract PreparedStatement getDeleteStatement(Connection con,GenericType objectToDelete);
 
+    /***
+     * Constructor para definir el nombre de la tabla y los campos
+     */
     public BaseDao(String tableName, String[] tableFields) {
         this.tableName = tableName;
         this.tableFields = tableFields;
     }
 
+    /***
+     * Metodo para insertar un registro
+     */
+    @Override
+    public boolean insertRecord(GenericType objectToBeInserted) {
+        boolean inserted = false;
+        Connection con = null;
+        try{
+            con = this.con.getConnection();
+            //Usando el metodo para obtener la consulta prepara DESDE la clase que hereda de BaseDao
+            PreparedStatement preparedStatement = this.getInsertStatement(con,objectToBeInserted);
+            inserted = preparedStatement.execute();
+        }
+        catch (SQLException e ){
+            e.printStackTrace();
+        }
+        return inserted;
+    }
+
+    @Override
+    public boolean updateRecord(GenericType objectToBeInserted) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteRecord(GenericType objectToBeInserted) {
+        Connection con = null;
+        boolean deleted= false;
+        try {
+            con = this.con.getConnection();
+            PreparedStatement preparedStatement = this.getDeleteStatement(con,objectToBeInserted);
+            if(preparedStatement.executeUpdate() > 0){
+                deleted = true;
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }finally{
+            this.close(con);
+        }
+        return deleted;
+    }
+
     @Override
     public ArrayList<GenericType> getAll() {
-        return null;
+        java.sql.Connection con = null;
+        ArrayList<GenericType> obtainedRecords = new ArrayList<>();
+        try{
+            con = this.con.getConnection();
+            Statement statement = con.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+this.tableName);
+            while (resultSet.next()){
+                GenericType row = this.mapToObject(resultSet);
+                obtainedRecords.add(row);
+            }
+            resultSet.close();
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }finally {
+            this.close(con);
+        }
+        return obtainedRecords;
+    }
+
+    private void close(Connection con){
+        try{
+            con.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 }

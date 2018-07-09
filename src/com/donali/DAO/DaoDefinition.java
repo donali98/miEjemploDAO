@@ -1,6 +1,5 @@
 package com.donali.DAO;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 
 /***
@@ -13,8 +12,11 @@ import java.util.ArrayList;
  * es pura y exclusivamente la implementacion
  */
 public interface DaoDefinition<GenericType> {
+    Connection con = Connection.getInstance();
     //Metodo que retorna una lista de tipo 'algo' de la base de datos
     ArrayList<GenericType> getAll();
-
+    boolean insertRecord(GenericType objectToBeInserted);
+    boolean updateRecord(GenericType objectToBeInserted);
+    boolean deleteRecord(GenericType objectToBeInserted);
 
 }
